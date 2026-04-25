@@ -23,7 +23,7 @@ export function printHelp(): void {
   console.log(color.blue('创建项目选项:'))
   console.log(color.green('  -p, --platform <type>  指定平台 (h5, mp-weixin, app, mp-alipay, mp-toutiao)'))
   console.log(color.green('                         支持多选: -p h5,mp-weixin 或 -p h5 -p mp-weixin'))
-  console.log(color.green('  -u, --ui <library>     指定UI库 (wot-ui, uview-pro, sard-uniapp, uv-ui, uview-plus, none)'))
+  console.log(color.green('  -u, --ui <library>     指定UI库 (wot-ui, wot-ui-v2, uview-pro, sard-uniapp, uv-ui, uview-plus, tdesign, none)'))
   console.log(color.green('  -l, --login            是否需要登录策略'))
   console.log(color.green('  -i, --i18n             是否需要多语言'))
   console.log(color.green('  --lime-echart          添加 lime-echart 图表库（ECharts全端兼容）'))

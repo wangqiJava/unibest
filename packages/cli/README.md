@@ -57,7 +57,7 @@ pnpm create unibest add i18n --force
 | 参数             | 说明                                                                            |
 | ---------------- | ------------------------------------------------------------------------------- |
 | `-p, --platform` | 平台类型，支持 `h5`, `mp-weixin`, `app`, `mp-alipay`, `mp-toutiao`              |
-| `-u, --ui`       | UI 库，支持 `none`, `wot-ui`, `uview-pro`, `sard-uniapp`, `uv-ui`, `uview-plus` |
+| `-u, --ui`       | UI 库，支持 `none`, `wot-ui`, `wot-ui-v2`, `uview-pro`, `sard-uniapp`, `uv-ui`, `uview-plus`, `tdesign` |
 | `-l, --login`    | 启用登录策略                                                                    |
 | `-i, --i18n`     | 启用多语言                                                                      |
 

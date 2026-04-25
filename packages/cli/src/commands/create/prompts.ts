@@ -7,7 +7,7 @@ import { checkProjectNameExistAndValidate } from '../../utils/validate'
 
 // 定义常量以便复用和校验
 const VALID_PLATFORMS = ['h5', 'mp-weixin', 'app', 'mp-alipay', 'mp-toutiao']
-const VALID_UI_LIBRARIES = ['none', 'wot-ui', 'uview-pro', 'sard-uniapp', 'uv-ui', 'uview-plus']
+const VALID_UI_LIBRARIES = ['none', 'wot-ui-v2', 'wot-ui', 'uview-pro', 'sard-uniapp', 'uv-ui', 'uview-plus', 'tdesign']
 const VALID_CHART_LIBRARIES = ['lime-echart', 'ucharts']
 
 /**
@@ -148,7 +148,8 @@ export async function promptUser(projectName?: string, argv: Record<string, any>
         message: '请选择UI库',
         options: [
           { value: 'none', label: '无UI库' },
-          { value: 'wot-ui', label: 'wot-ui' },
+          { value: 'wot-ui-v2', label: 'wot-ui V2（@wot-ui/ui）' },
+          { value: 'wot-ui', label: 'wot-ui（v1 / wot-design-uni）' },
           { value: 'uview-pro', label: 'uview-pro' },
           { value: 'sard-uniapp', label: 'sard-uniapp' },
           { value: 'uv-ui', label: 'uv-ui' },

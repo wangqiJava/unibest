@@ -8,6 +8,8 @@ import { join } from 'node:path'
 export interface UILibraryConfig {
   /** 包名 */
   packageName: string
+  /** 写入 package.json 的 devDependencies（仅补充缺失项） */
+  devDependencies?: Record<string, string>
   /** easycom 配置 */
   easycom?: {
     pattern: string
@@ -41,6 +43,16 @@ export const UI_LIBRARY_CONFIGS: Record<UILibrary, UILibraryConfig | null> = {
       path: 'wot-design-uni/components/wd-$1/wd-$1.vue',
     },
     types: ['wot-design-uni/global.d.ts'],
+  },
+  /** Wot UI v2，npm 包 @wot-ui/ui，见 https://wot-ui.cn/guide/quick-use.html */
+  'wot-ui-v2': {
+    packageName: '@wot-ui/ui',
+    devDependencies: { sass: 'latest' },
+    easycom: {
+      pattern: '^wd-(.*)',
+      path: '@wot-ui/ui/components/wd-$1/wd-$1.vue',
+    },
+    types: ['@wot-ui/ui/global'],
   },
   'sard-uniapp': {
     packageName: 'sard-uniapp',
@@ -116,7 +128,7 @@ export async function applyUILibraryConfig(projectPath: string, uiLibrary: UILib
   }
 
   // 1. 更新 package.json
-  await updatePackageJson(projectPath, config.packageName)
+  await updatePackageJson(projectPath, config.packageName, config.devDependencies)
 
   // 2. 更新 pages.config.ts
   if (config.easycom) {
@@ -159,7 +171,11 @@ export async function applyUILibraryConfig(projectPath: string, uiLibrary: UILib
 /**
  * 更新 package.json，添加 UI 库依赖
  */
-async function updatePackageJson(projectPath: string, packageName: string): Promise<void> {
+async function updatePackageJson(
+  projectPath: string,
+  packageName: string,
+  devDependencies?: Record<string, string>,
+): Promise<void> {
   const packageJsonPath = join(projectPath, 'package.json')
   if (!existsSync(packageJsonPath)) {
     return
@@ -173,6 +189,17 @@ async function updatePackageJson(projectPath: string, packageName: string): Prom
   // 如果依赖已存在，不重复添加
   if (!packageJson.dependencies[packageName]) {
     packageJson.dependencies[packageName] = 'latest'
+  }
+
+  if (devDependencies && Object.keys(devDependencies).length > 0) {
+    if (!packageJson.devDependencies) {
+      packageJson.devDependencies = {}
+    }
+    for (const [name, version] of Object.entries(devDependencies)) {
+      if (!packageJson.devDependencies[name]) {
+        packageJson.devDependencies[name] = version
+      }
+    }
   }
 
   writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`)
