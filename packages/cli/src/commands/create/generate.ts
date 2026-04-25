@@ -126,6 +126,12 @@ export async function generateProject(options: PromptResult) {
     logger.info('  pnpm dev')
     logger.info('  运行完以上命令后，再运行其他平台')
     logger.info('  如：pnpm dev:mp, pnpm dev:app 等')
+    if (uiLibrary === 'wot-ui-v2') {
+      logger.info('wot-ui-v2 AI 协作指引：')
+      logger.info('  https://unibest.tech/unibest-docs/base/7-ui')
+      logger.info('Wot UI 官方 LLMs 指南：')
+      logger.info('  https://wot-ui.cn/guide/llms-txt.html')
+    }
   }
   catch (error) {
     logger.error(`生成项目失败: ${(error as Error).message}`)
