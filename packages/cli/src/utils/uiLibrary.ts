@@ -166,6 +166,82 @@ export async function applyUILibraryConfig(projectPath: string, uiLibrary: UILib
   if (config.needAppVue && config.appVueImport) {
     await updateAppVue(projectPath, config.appVueImport)
   }
+
+  // 7. wot-ui-v2 需要 vite resolver 以确保 npm 组件在 H5 端样式正确生效
+  if (uiLibrary === 'wot-ui-v2') {
+    await ensureWotUiV2Resolver(projectPath)
+  }
+}
+
+const WOT_UI_V2_RESOLVER_FILENAME = 'wot-ui-resolver.ts'
+const WOT_UI_V2_RESOLVER_CONTENT = `import type { ComponentResolver } from '@uni-helper/vite-plugin-uni-components'
+import { kebabCase } from '@uni-helper/vite-plugin-uni-components'
+
+/**
+ * npm 安装的 Wot UI 组件在 H5 端需通过 vite-plugin-uni-components 解析，
+ * 才能正确挂载组件样式。
+ */
+export function WotResolver(): ComponentResolver {
+  return {
+    type: 'component',
+    resolve: (name: string) => {
+      if (name.match(/^Wd[A-Z]/)) {
+        const compName = kebabCase(name)
+        return {
+          name,
+          from: \`@wot-ui/ui/components/\${compName}/\${compName}.vue\`,
+        }
+      }
+      if (name.startsWith('wd-')) {
+        return {
+          name,
+          from: \`@wot-ui/ui/components/\${name}/\${name}.vue\`,
+        }
+      }
+    },
+  }
+}
+`
+
+async function ensureWotUiV2Resolver(projectPath: string): Promise<void> {
+  const resolverPath = join(projectPath, WOT_UI_V2_RESOLVER_FILENAME)
+  const viteConfigPath = join(projectPath, 'vite.config.ts')
+
+  if (!existsSync(resolverPath)) {
+    writeFileSync(resolverPath, WOT_UI_V2_RESOLVER_CONTENT)
+  }
+
+  if (existsSync(viteConfigPath)) {
+    updateViteConfigForWotUiV2(viteConfigPath)
+  }
+}
+
+function updateViteConfigForWotUiV2(viteConfigPath: string): void {
+  const original = readFileSync(viteConfigPath, 'utf8')
+  let content = original
+
+  if (!content.includes(`from './${WOT_UI_V2_RESOLVER_FILENAME.replace('.ts', '')}'`)) {
+    const importTarget = `import { WotResolver } from './${WOT_UI_V2_RESOLVER_FILENAME.replace('.ts', '')}'`
+    const uniPagesImportRegex = /(import\s+UniPages\s+from\s+['"]@uni-helper\/vite-plugin-uni-pages['"]\s*\n)/
+    if (uniPagesImportRegex.test(content)) {
+      content = content.replace(uniPagesImportRegex, `$1${importTarget}\n`)
+    }
+    else {
+      content = `${importTarget}\n${content}`
+    }
+  }
+
+  const uniComponentsRegex = /UniComponents\(\{[\s\S]*?\}\)/
+  const matched = content.match(uniComponentsRegex)
+  if (matched && !matched[0].includes('resolvers:')) {
+    const block = matched[0]
+    const updatedBlock = block.replace(/\}\)$/, `  resolvers: [WotResolver()],\n      })`)
+    content = content.replace(block, updatedBlock)
+  }
+
+  if (content !== original) {
+    writeFileSync(viteConfigPath, ensureTrailingNewline(content))
+  }
 }
 
 /**
